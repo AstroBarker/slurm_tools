@@ -41,6 +41,8 @@
 #           execution and file manipulation lines belo
 #         - submit the job with the appropriate value of NJOBS, eg:
 #                    sbatch --export=NJOBS=5 <scriptname>
+#         - specify  environment variable FRESH=1 if it is the first run 
+#                    (e.g., not a restart)
 #
 #  * To kill a job sequence, either touch the file STOP_SEQUENCE or qdel
 #    the held job followed by the running job
@@ -57,21 +59,28 @@ ECHO=/bin/echo
 #   NJOB is the number of the previous job in the sequence (defaults to 0)
 #
   
-if [ X$NJOBS == X ]; then
+if [[ X$NJOBS == X ]]; then
     $ECHO "NJOBS (total number of jobs in sequence) is not set - defaulting to 1"
     export NJOBS=1
 fi
   
-if [ X$NJOB == X ]; then
+if [[ X$NJOB == X ]]; then
     $ECHO "NJOB (previous job number in sequence) is not set - defaulting to 0"
     export NJOB=0
+fi
+
+if [[ X$FRESH == X ]]; then
+    $ECHO "FRESH not set -- assuming fresh run"
+    export FRESH=1
+else
+    export FRESH=0
 fi
 
 #
 # Quick termination of job sequence - look for a specific file 
 #  (the filename could be a qsub -v argument)
 #
-if [ -f STOP_SEQUENCE ]; then
+if [[ -f STOP_SEQUENCE ]]; then
     $ECHO  "Terminating sequence after $NJOB jobs"
     exit 0
 fi
@@ -84,7 +93,7 @@ NJOB=$(($NJOB+1))
 #
 # Are we in an incomplete job sequence - more jobs to run ?
 #
-if [ $NJOB -lt $NJOBS ]; then
+if [[ $NJOB -lt $NJOBS ]]; then
     #
     # Now submit the next job
     # (Assumes -N option not used to change job name.)
@@ -101,7 +110,7 @@ fi
 # File manipulation prior to job commencing, eg. clean up previous output files,
 # check for consistency of checkpoint files, ...
 #
-if [ $NJOB -gt 1 ]; then
+if [[ $NJOB -gt 1 ]]; then
     echo " "
     # .... USER INSERTION HERE 
 fi
@@ -115,14 +124,20 @@ fi
 # .... USER INSERTION OF EXECUTABLE LINE HERE 
 #===================================================
 
-sleep 100
-  
+if [[ $FRESH == 1 ]]; then
+    # fresh run (no restart)
+else
+    # restart command
+fi
+
+export FRESH=0 # false -- restarts
+
 #
 # Not expected to reach this point in general but if we do, check that all 
 # is OK.  If the job command exited with an error, terminate the job
 #
 errstat=$?
-if [ $errstat -ne 0 ]; then
+if [[ $errstat -ne 0 ]]; then
     # A brief nap so SBATCH kills us in normal termination. Prefer to 
     # be killed by SBATCH if SBATCH detected some resource excess
     sleep 5  
