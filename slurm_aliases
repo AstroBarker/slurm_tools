@@ -1,0 +1,2 @@
+alias q='squeue -l -u ${USER}'
+alias njobs='echo "$(q | wc -l) -2" | bc'
