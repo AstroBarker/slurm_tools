@@ -5,16 +5,7 @@
 #SBATCH -C NOAUTO:amd20
 #SBATCH --mem=16GB
 #SBATCH --time=00:01:00
-
-###
-# NEEDS WORK
-###
-
   
-# =============================================================================
-# Based on PBS scripts from https://tinyurl.com/selfrestart 
-# Modified for SLURM
-# =============================================================================
   
 # =============================================================================
 #  Self resubmitting SBATCH bash script:
@@ -90,6 +81,9 @@ fi
 # ========================================================================
 # .... USER INSERTION OF EXECUTABLE LINE HERE 
 # ========================================================================
+
+cd ${SLURM_SUBMIT_DIR}
+python helloworld.py
 
   
 # 

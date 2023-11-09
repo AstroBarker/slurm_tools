@@ -4,7 +4,7 @@
 #SBATCH -n 16 # num_cores
 #SBATCH -C NOAUTO:amd20
 #SBATCH --mem=16GB
-#SBATCH --time=00:01:00
+#SBATCH --time=00:01:30
 #SBATCH -o slurm-%j.out
 #SBATCH -e slurm-%j.err
   
@@ -57,6 +57,7 @@ ECHO=/bin/echo
 # These variables are assumed to be set:
 #   NJOBS is the total number of jobs in a sequence of jobs (defaults to 1)
 #   NJOB is the number of the previous job in the sequence (defaults to 0)
+#   FRESH (0 or 1) indicates a fresh run (defaults to 1: not a restart)
 #
   
 if [[ X$NJOBS == X ]]; then
@@ -72,8 +73,6 @@ fi
 if [[ X$FRESH == X ]]; then
     $ECHO "FRESH not set -- assuming fresh run"
     export FRESH=1
-else
-    export FRESH=0
 fi
 
 #
@@ -100,7 +99,7 @@ if [[ $NJOB -lt $NJOBS ]]; then
     #
     NEXTJOB=$(($NJOB+1))
     $ECHO "Submitting job number $NEXTJOB in sequence of $NJOBS jobs"
-    sbatch --dependency=afterany:$SLURM_JOBID $SLURM_JOB_NAME
+    sbatch --dependency=afterok:$SLURM_JOBID $SLURM_JOB_NAME
 else
     $ECHO "Running last job in sequence of $NJOBS jobs"
 fi
@@ -124,13 +123,19 @@ fi
 # .... USER INSERTION OF EXECUTABLE LINE HERE 
 #===================================================
 
+echo $FRESH
 if [[ $FRESH == 1 ]]; then
     # fresh run (no restart)
+    cd ${SLURM_SUBMIT_DIR}
+    python helloworld.py
+    export FRESH=0 # false -- restarts
 else
     # restart command
+    cd ${SLURM_SUBMIT_DIR}
+    python helloworld2.py
 fi
-
 export FRESH=0 # false -- restarts
+
 
 #
 # Not expected to reach this point in general but if we do, check that all 
