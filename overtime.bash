@@ -87,7 +87,7 @@ fi
 #
 # Increment the counter to get current job number
 #
-NJOB=$(($NJOB+1))
+NJOB=$((NJOB+1))
 
 #
 # Are we in an incomplete job sequence - more jobs to run ?
@@ -97,9 +97,9 @@ if [[ $NJOB -lt $NJOBS ]]; then
     # Now submit the next job
     # (Assumes -N option not used to change job name.)
     #
-    NEXTJOB=$(($NJOB+1))
+    NEXTJOB=$((NJOB+1))
     $ECHO "Submitting job number $NEXTJOB in sequence of $NJOBS jobs"
-    sbatch --dependency=afterok:$SLURM_JOBID $SLURM_JOB_NAME
+    sbatch --dependency=afterok:"$SLURM_JOBID" "$SLURM_JOB_NAME"
 else
     $ECHO "Running last job in sequence of $NJOBS jobs"
 fi
@@ -123,15 +123,15 @@ fi
 # .... USER INSERTION OF EXECUTABLE LINE HERE 
 #===================================================
 
-echo $FRESH
+echo "$FRESH"
 if [[ $FRESH == 1 ]]; then
     # fresh run (no restart)
-    cd ${SLURM_SUBMIT_DIR}
+    cd "${SLURM_SUBMIT_DIR}" || exit
     python helloworld.py
     export FRESH=0 # false -- restarts
 else
     # restart command
-    cd ${SLURM_SUBMIT_DIR}
+    cd "${SLURM_SUBMIT_DIR}" || exit
     python helloworld2.py
 fi
 export FRESH=0 # false -- restarts
