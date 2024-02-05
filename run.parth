@@ -1,1 +1,14 @@
 #!/bin/bash
+
+# Based on script shared by Jonah Miller
+# Restart aware SLURM submission script (modulo packages and co) for Parthenon codes
+
+# ===== Module load, export, etc etc =====
+# ========================================
+
+MOST_RECENT_RESTART=$(find . -name "*.rhdf" 2> /dev/null | sort | tail -n 1)
+if [ -n "${MOST_RECENT_RESTART}" ]; then
+    srun ./myexec -r "${MOST_RECENT_RESTART}"  >(tee -a jobname.out) 2> >(tee -a jobname.err >&2)
+else
+    srun ./myexec -i inputfile.parthinput  >(tee -a jobname.out) 2> >(tee -a jobname.err >&2)
+fi
