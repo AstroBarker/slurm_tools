@@ -51,12 +51,12 @@ ECHO=/bin/echo
 #   NJOB is the number of the current job in the sequence (defaults to 1)
 #
   
-if [ X$NJOBS == X ]; then
+if [ X"$NJOBS" == X ]; then
     $ECHO "NJOBS (total number of jobs in sequence) is not set - defaulting to 1"
     export NJOBS=1
 fi
   
-if [ X$NJOB == X ]; then
+if [ X"$NJOB" == X ]; then
     $ECHO "NJOB (current job number in sequence) is not set - defaulting to 1"
     export NJOB=1
 fi
@@ -82,7 +82,7 @@ fi
 # .... USER INSERTION OF EXECUTABLE LINE HERE 
 # ========================================================================
 
-cd ${SLURM_SUBMIT_DIR}
+cd "${SLURM_SUBMIT_DIR}" || exit
 python helloworld.py
 
   
@@ -102,7 +102,7 @@ fi
 #   
 # Are we in an incomplete job sequence - more jobs to run ?
 #   
-if [ $NJOB -lt $NJOBS ]; then
+if [ "$NJOB" -lt "$NJOBS" ]; then
 
 # 
 # Post-job file manipulation (preparing for next job etc) goes here ...
@@ -113,7 +113,7 @@ if [ $NJOB -lt $NJOBS ]; then
 #
 # Now increment counter and submit the next job
 # 
-    NJOB=$(($NJOB+1))
+    NJOB=$((NJOB+1))
     $ECHO "Submitting job number $NJOB in sequence of $NJOBS jobs"
     sbatch run_jobs
 else
