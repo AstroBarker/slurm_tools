@@ -1,2 +1,4 @@
 alias q='squeue -l -u ${USER}'
 alias njobs='echo "$(q | wc -l) -2" | bc'
+alias scancel_all="squeue -u ${USER} | grep ${USER} | awk '{print $1}' | xargs -n 1 scancel"
+
